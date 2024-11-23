@@ -1,4 +1,5 @@
 db.sqlite3
+.env
 *.egg-info
 *.pot
 *.py[co]

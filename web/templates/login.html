@@ -1,0 +1,87 @@
+{% load static %}  
+
+{% block head %}  
+<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">  
+{% endblock %}  
+
+{% block content %}  
+<h2>ورود به حساب کاربری</h2>  
+<form id="login-form" action="{% url 'login' %}" method="POST" onsubmit="handleLoginFormSubmit(event)">  
+  {% csrf_token %}  <!-- اضافه کردن توکن CSRF -->
+  <label for="login-username">نام کاربری یا ایمیل:</label>  
+  <input  
+    type="text"  
+    id="login-username"  
+    name="username"  
+    placeholder="نام کاربری یا ایمیل"  
+    required  
+  />  
+  <label for="login-password">رمز عبور:</label>  
+  <input  
+    type="password"  
+    id="login-password"  
+    name="password"  
+    placeholder="رمز عبور"  
+    required  
+  />  
+
+  <button type="submit">ورود</button>  
+</form>  
+
+<!-- دکمه هدایت به صفحه ثبت‌نام -->
+<p>اگر حساب کاربری ندارید، <a href="{% url 'register' %}">ثبت‌نام کنید</a>.</p>
+
+<script>  
+  function showSuccessMessage(message) {  
+    var messageDiv = document.getElementById("success-message");  
+    messageDiv.innerText = message;  
+    messageDiv.style.display = "block";  
+  }  
+
+  function handleFormSubmit(event) {  
+    event.preventDefault();  
+    var form = event.target;  
+    var formData = new FormData(form);  
+
+    fetch('/login/', {   
+        method: "POST",  
+        body: formData,  
+        headers: {  
+          "X-Requested-With": "XMLHttpRequest",  
+          "X-CSRFToken": formData.get("csrfmiddlewaretoken"),  
+        },  
+      })  
+      .then((response) => response.json())  
+      .then((data) => {  
+        if (data.status === "success") {  
+          showSuccessMessage(data.message);  
+        } else {  
+          alert(data.message);  
+        }  
+      });  
+  }  
+
+  function handleLoginFormSubmit(event) {  
+    event.preventDefault();  
+    var form = event.target;  
+    var formData = new FormData(form);  
+
+    fetch(form.action, {  
+      method: "POST",  
+      body: formData,  
+      headers: {  
+        "X-Requested-With": "XMLHttpRequest",  
+        "X-CSRFToken": formData.get("csrfmiddlewaretoken"),  
+      },  
+    })  
+      .then((response) => response.json())  
+      .then((data) => {  
+        if (data.status === "success") {  
+          window.location.href = "/dashboard/";
+        } else {  
+          alert(data.message);  
+        }  
+      });  
+  }  
+</script>  
+{% endblock %}

@@ -3,4 +3,4 @@ from .models import Expense, Income, Token
 
 admin.site.register(Expense)
 admin.site.register(Income)
-admin.site.register(Token)
+admin.site.register(Token) 
