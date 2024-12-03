@@ -26,9 +26,14 @@ import string
 from django.views.generic import TemplateView  
 from django.middleware.csrf import get_token
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.utils import timezone  
+
 
 
 random_str = lambda N: ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(N))
+
+
 
 def get_csrf_token(request):
     return JsonResponse({'csrfToken': get_token(request)})
@@ -41,72 +46,87 @@ def get_client_ip(request: HttpRequest) -> str:
         ip = request.META.get('REMOTE_ADDR')  
     return ip  
 
-def submit_income(request):
-    """ submits an income"""
-    if request.method == 'POST':
-        try:
-            this_token = request.POST.get('token')
-            this_user = User.objects.filter(token__token=this_token).first()
+
+@login_required  
+def submit_income(request):  
+    """Handles form submission for income."""  
+    if request.method == 'POST':  
+        try:  
+            # بررسی کاربر  
+            this_user = request.user  
             
-            if not this_user:
-                return JsonResponse({'status': 'error', 'message': 'Invalid token.'}, status=400)
+            # دریافت اطلاعات از فرم  
+            amount = request.POST.get('amount')  
+            text = request.POST.get('text')  
+            date_str = request.POST.get('date')  # اگر تاریخ هم به فرم اضافه شده است  
+            
+            # اعتبارسنجی ورودی‌ها  
+            if not amount or not text:  
+                return JsonResponse({'status': 'error', 'message': 'Amount and text are required.'}, status=400)  
 
-            if 'date' in request.POST:
-                date = request.POST['date']
-                print (date)
-            else:
-                date = timezone.now()
+            # تبدیل مقدار amount به نوع عددی  
+            try:  
+                amount = float(amount)  # یا int() بسته به نیاز شما  
+            except ValueError:  
+                return JsonResponse({'status': 'error', 'message': 'Invalid amount format.'}, status=400)  
 
-            amount = request.POST.get('amount')
-            text = request.POST.get('text')
-            if not amount or not text:
-                return JsonResponse({'status': 'error', 'message': 'Amount and text are required.'}, status=400)
+            # پردازش تاریخ  
+            date = timezone.now()  # تاریخ پیش‌فرض  
+            if date_str:  
+                try:  
+                    date = timezone.make_aware(datetime.strptime(date_str, '%Y-%m-%d'))  # فرمت تاریخ باید با آنچه که دریافت می‌کنید، مطابقت داشته باشد  
+                except ValueError:  
+                    return JsonResponse({'status': 'error', 'message': 'Invalid date format.'}, status=400)  
 
-            Income.objects.create(
-                user=this_user, amount=amount, text=text, date=date)
+            # ذخیره درآمد در پایگاه داده  
+            Income.objects.create(user=this_user, amount=amount, text=text, date=date)  
 
-            print("I'm in submit expense")
-            print(request.POST)
+            return JsonResponse({'status': 'ok'})  
 
-            return JsonResponse({'status': 'ok'}, encoder=JSONEncoder)
+        except Exception as e:  
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)  
+    else:  
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)  
 
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    else:
+def submit_expense(request):  
+    """Handles form submission for expenses."""  
+    if request.method == 'POST':  
+        try:  
+            this_user = request.user  
+            
+            # دریافت اطلاعات از فرم  
+            amount = request.POST.get('amount')  
+            text = request.POST.get('text')  # استفاده از `text` به جای `description`  
+            date_str = request.POST.get('date')  
+            
+            # اعتبارسنجی ورودی‌ها  
+            if not amount or not text:  
+                return JsonResponse({'status': 'error', 'message': 'Amount and description are required.'}, status=400)  
+
+            # تبدیل مقدار amount به نوع عددی  
+            try:  
+                amount = float(amount)  
+            except ValueError:  
+                return JsonResponse({'status': 'error', 'message': 'Invalid amount format.'}, status=400)  
+
+            # پردازش تاریخ  
+            date = timezone.now()  # تاریخ پیش‌فرض  
+            if date_str:  
+                try:  
+                    date = timezone.make_aware(datetime.strptime(date_str, '%Y-%m-%d'))  
+                except ValueError:  
+                    return JsonResponse({'status': 'error', 'message': 'Invalid date format.'}, status=400)  
+
+            # ذخیره خرج در پایگاه داده  
+            Expense.objects.create(user=this_user, amount=amount, text=text, date=date)  
+
+            return JsonResponse({'status': 'ok'})  
+
+        except Exception as e:  
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)  
+    else:  
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
         
-def submit_expense(request):
-    """ submits an expense"""
-    if request.method == 'POST':
-        try:
-            this_token = request.POST.get('token')
-            this_user = User.objects.filter(token__token=this_token).first()
-            if not this_user:
-                return JsonResponse({'status': 'error', 'message': 'Invalid token.'}, status=400)
-
-            if 'date' in request.POST:
-                date = request.POST['date']
-            else:
-                date = timezone.now()
-
-            amount = request.POST.get('amount')
-            text = request.POST.get('text')
-            if not amount or not text:
-                return JsonResponse({'status': 'error', 'message': 'Amount and text are required.'}, status=400)
-
-            Expense.objects.create(
-                user=this_user, amount=amount, text=text, date=date)
-
-            print("I'm in submit expense")
-            print(request.POST)
-
-            return JsonResponse({'status': 'ok'}, encoder=JSONEncoder)
-
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-
 def register(request):  
     if request.method == 'POST':  
         form = RegistrationForm(request.POST)  
@@ -163,7 +183,7 @@ def activate(request):
         
         reset_code.delete()  
 
-        return redirect('activate')
+        return redirect('login')
     except (User.DoesNotExist, Passwordresetcodes.DoesNotExist):  
         messages.error(request, 'این کد فعال‌سازی معتبر نیست. لطفا دوباره تلاش کنید.')  
         return render(request, 'login.html', {'token': None, 'error': 'این کد فعال‌سازی معتبر نیست. لطفا دوباره تلاش کنید.'})
@@ -179,45 +199,105 @@ def login_view(request):
         else:  
             return JsonResponse({"status": "error", "message": "نام کاربری یا رمز عبور صحیح نیست."})  
     return JsonResponse({"status": "error", "message": "روش درخواست نامعتبر است."})  
-@login_required
-def dashboard_view(request):
-    income_form = IncomeForm()
-    expense_form = ExpenseForm()
 
-    if request.method == 'POST':
-        if 'income_submit' in request.POST:
-            income_form = IncomeForm(request.POST)
-            if income_form.is_valid():
-                income = income_form.save(commit=False)
-                income.user = request.user
-                if not income_form.cleaned_data['date']:
-                    income.date = timezone.datetime.now()
-                income.save()
-                messages.success(request, 'درآمد با موفقیت ثبت شد.')
-                return redirect('dashboard')
-        elif 'expense_submit' in request.POST:
-            expense_form = ExpenseForm(request.POST)
-            if expense_form.is_valid():
-                expense = expense_form.save(commit=False)
-                expense.user = request.user
-                if not expense_form.cleaned_data['date']:
-                    expense.date = timezone.datetime.now()
-                expense.save()
-                messages.success(request, 'هزینه با موفقیت ثبت شد.')
-                return redirect('dashboard')
+@login_required(login_url='/login/')  
+def dashboard_view(request):  
+    income_form = IncomeForm()  
+    expense_form = ExpenseForm()  
 
-    incomes = Income.objects.filter(user=request.user).order_by('-date')
-    expenses = Expense.objects.filter(user=request.user).order_by('-date')
+    if request.method == 'POST':  
+        if 'income_submit' in request.POST:  
+            income_form = IncomeForm(request.POST)  
+            if income_form.is_valid():  
+                income = income_form.save(commit=False)  
+                income.user = request.user  
+                # بررسی تاریخ و تبدیل به زمان آگاه  
+                if not income_form.cleaned_data['date']:  
+                    income.date = timezone.now()  
+                else:  
+                    # فرض بر این است که تاریخ به فرمت شمسی است  
+                    date_jalali = income_form.cleaned_data['date']  
+                    date_gregorian = jdatetime.date(*map(int, date_jalali.split('-'))).togregorian()  
+                    income.date = timezone.make_aware(datetime.combine(date_gregorian, datetime.min.time()))  
+                income.save()  
+                messages.success(request, 'درآمد با موفقیت ثبت شد.')  
+                return redirect('dashboard')  
 
-    total_income = sum(income.amount for income in incomes)
-    total_expense = sum(expense.amount for expense in expenses)
+        elif 'expense_submit' in request.POST:  
+            expense_form = ExpenseForm(request.POST)  
+            if expense_form.is_valid():  
+                expense = expense_form.save(commit=False)  
+                expense.user = request.user  
+                # بررسی تاریخ و تبدیل به زمان آگاه  
+                if not expense_form.cleaned_data['date']:  
+                    expense.date = timezone.now()  
+                else:  
+                    date_jalali = expense_form.cleaned_data['date']  
+                    date_gregorian = jdatetime.date(*map(int, date_jalali.split('-'))).togregorian()  
+                    expense.date = timezone.make_aware(datetime.combine(date_gregorian, datetime.min.time()))  
+                expense.save()  
+                messages.success(request, 'هزینه با موفقیت ثبت شد.')  
+                return redirect('dashboard')  
 
-    context = {
-        'income_form': income_form,
-        'expense_form': expense_form,
-        'incomes': incomes,
-        'expenses': expenses,
-        'total_income': total_income,
-        'total_expense': total_expense,
-    }
-    return render(request, 'dashboard.html', context)
+    # دریافت درآمدها و هزینه‌ها  
+    incomes = Income.objects.filter(user=request.user).order_by('-date')  
+    expenses = Expense.objects.filter(user=request.user).order_by('-date')  
+
+    # محاسبه مجموع درآمد و هزینه  
+    total_income = sum(income.amount for income in incomes)  
+    total_expense = sum(expense.amount for expense in expenses)  
+
+    # تبدیل تاریخ و زمان به فرمت دلخواه  
+    formatted_incomes = [  
+        {  
+            'amount': income.amount,  
+            'text': income.text,  
+            'date': income.date.strftime('%Y-%m-%d'),  # فرمت تاریخ  
+            'time': income.date.strftime('%H:%M:%S'),  # فرمت زمان  
+        }  
+        for income in incomes  
+    ]  
+
+    formatted_expenses = [  
+        {  
+            'amount': expense.amount,  
+            'text': expense.text,  
+            'date': expense.date.strftime('%Y-%m-%d'),  # فرمت تاریخ  
+            'time': expense.date.strftime('%H:%M:%S'),  # فرمت زمان  
+        }  
+        for expense in expenses  
+    ]  
+
+    # ایجاد context برای ارسال به قالب  
+    context = {  
+        'income_form': income_form,  
+        'expense_form': expense_form,  
+        'incomes': formatted_incomes,  
+        'expenses': formatted_expenses,  
+        'total_income': total_income,  
+        'total_expense': total_expense,  
+    }  
+    return render(request, 'dashboard.html', context)  
+
+def logout_view(request):  
+    logout(request)  
+    return render(request, 'login.html')  
+
+@login_required  
+def dashboard_expense(request):  
+    user_expenses = Expense.objects.filter(user=request.user)  
+    total_expenses = sum(expense.amount for expense in user_expenses)  
+
+    return render(request, 'dashboard_expense.html', {  
+        'expenses': user_expenses,  
+        'total_expenses': total_expenses,  
+    })  
+@login_required  
+def dashboard_income(request):  
+    user_income = Income.objects.filter(user=request.user)  
+    total_income = sum(income.amount for income in user_income)  
+
+    return render(request, 'dashboard_income.html', {
+        'incomes': user_income,  
+        'total_income': total_income,  
+    })

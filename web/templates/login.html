@@ -1,7 +1,7 @@
 {% load static %}  
 
 {% block head %}  
-<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">  
+<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">  
 {% endblock %}  
 
 {% block content %}  
@@ -43,7 +43,7 @@
     var form = event.target;  
     var formData = new FormData(form);  
 
-    fetch('/login/', {   
+    fetch('/activate/', {   
         method: "POST",  
         body: formData,  
         headers: {  

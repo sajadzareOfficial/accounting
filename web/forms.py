@@ -28,10 +28,10 @@ class IncomeForm(forms.ModelForm):
         model = Income
         fields = ['text', 'date', 'time', 'amount']
 
-class ExpenseForm(forms.ModelForm):
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
-    time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}), required=False)
+class ExpenseForm(forms.ModelForm):  
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)  
+    time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}), required=False)  
 
-    class Meta:
-        model = Expense
-        fields = ['text', 'date', 'time', 'amount']
+    class Meta:  
+        model = Expense  
+        fields = ['text', 'date', 'time', 'amount']  

@@ -12,4 +12,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('activate/', views.activate, name='activate'),
     path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/expense/', views.dashboard_expense, name='dashboard_expense'),  
+    path('dashboard/income/', views.dashboard_income, name='dashboard_income'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
