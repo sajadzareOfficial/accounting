@@ -23,7 +23,7 @@
                     <i class="fas fa-user fa-fw"></i>  
                 </a>  
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">  
-                    <a class="dropdown-item" href="{% url 'login' %}">{{ Logout }}logout</a>  
+                    <a class="dropdown-item" href="{% url 'logout' %}">logout</a>  
                 </div>  
             </li>  
         </ul>  
@@ -47,20 +47,21 @@
                             <div class="sb-nav-link-icon"><i class="fa fa-snowplow"></i></div>  
                             Expense  
                         </a>  
-                        <a class="nav-link" href="{% url 'login' %}">  
+                        <a class="nav-link" href="{% url 'logout' %}">  
                             <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>  
-                            {{ Logout }}logout  
+                            logout  
                         </a>  
                     </div>  
                 </div>  
                 <div class="sb-sidenav-footer">  
                     <div class="small">Logged in as:</div>  
-                    {{ user.username }}  <!-- استفاده از متغیر user برای نام کاربر -->  
+                    {{ user.username }}  
                 </div>  
             </nav>  
         </div>  
         <div id="layoutSidenav_content">  
             <main>  
+                <div id="message" style="margin-top: 20px;"></div>
                 <div class="container-fluid" id="content">  
                     <div class="">  
                         <h1 class="mt-4">Home</h1>  

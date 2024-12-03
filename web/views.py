@@ -81,7 +81,7 @@ def submit_income(request):
             # ذخیره درآمد در پایگاه داده  
             Income.objects.create(user=this_user, amount=amount, text=text, date=date)  
 
-            return JsonResponse({'status': 'ok'})  
+            return redirect('/dashboard/')
 
         except Exception as e:  
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)  
@@ -120,7 +120,7 @@ def submit_expense(request):
             # ذخیره خرج در پایگاه داده  
             Expense.objects.create(user=this_user, amount=amount, text=text, date=date)  
 
-            return JsonResponse({'status': 'ok'})  
+            return redirect('/dashboard/')
 
         except Exception as e:  
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)  
@@ -200,88 +200,79 @@ def login_view(request):
             return JsonResponse({"status": "error", "message": "نام کاربری یا رمز عبور صحیح نیست."})  
     return JsonResponse({"status": "error", "message": "روش درخواست نامعتبر است."})  
 
-@login_required(login_url='/login/')  
-def dashboard_view(request):  
-    income_form = IncomeForm()  
-    expense_form = ExpenseForm()  
+@login_required(login_url='/activate/')
+def dashboard_view(request):
+    income_form = IncomeForm()
+    expense_form = ExpenseForm()
 
-    if request.method == 'POST':  
-        if 'income_submit' in request.POST:  
-            income_form = IncomeForm(request.POST)  
-            if income_form.is_valid():  
-                income = income_form.save(commit=False)  
-                income.user = request.user  
-                # بررسی تاریخ و تبدیل به زمان آگاه  
-                if not income_form.cleaned_data['date']:  
-                    income.date = timezone.now()  
-                else:  
-                    # فرض بر این است که تاریخ به فرمت شمسی است  
-                    date_jalali = income_form.cleaned_data['date']  
-                    date_gregorian = jdatetime.date(*map(int, date_jalali.split('-'))).togregorian()  
-                    income.date = timezone.make_aware(datetime.combine(date_gregorian, datetime.min.time()))  
-                income.save()  
-                messages.success(request, 'درآمد با موفقیت ثبت شد.')  
-                return redirect('dashboard')  
+    if request.method == 'POST':
+        if 'income_submit' in request.POST:
+            income_form = IncomeForm(request.POST)
+            if income_form.is_valid():
+                income = income_form.save(commit=False)
+                income.user = request.user
+                if not income_form.cleaned_data['date']:
+                    income.date = timezone.now()
+                else:
+                    date_jalali = income_form.cleaned_data['date']
+                    date_gregorian = datetime.date(*map(int, date_jalali.split('-'))).togregorian()
+                    income.date = timezone.make_aware(datetime.combine(date_gregorian, datetime.min.time()))
+                income.save()
+                messages.success(request, 'درآمد با موفقیت ثبت شد.')           
 
-        elif 'expense_submit' in request.POST:  
-            expense_form = ExpenseForm(request.POST)  
-            if expense_form.is_valid():  
-                expense = expense_form.save(commit=False)  
-                expense.user = request.user  
-                # بررسی تاریخ و تبدیل به زمان آگاه  
-                if not expense_form.cleaned_data['date']:  
-                    expense.date = timezone.now()  
-                else:  
-                    date_jalali = expense_form.cleaned_data['date']  
-                    date_gregorian = jdatetime.date(*map(int, date_jalali.split('-'))).togregorian()  
-                    expense.date = timezone.make_aware(datetime.combine(date_gregorian, datetime.min.time()))  
-                expense.save()  
-                messages.success(request, 'هزینه با موفقیت ثبت شد.')  
-                return redirect('dashboard')  
+        elif 'expense_submit' in request.POST:
+            expense_form = ExpenseForm(request.POST)
+            if expense_form.is_valid():
+                expense = expense_form.save(commit=False)
+                expense.user = request.user
+                if not expense_form.cleaned_data['date']:
+                    expense.date = timezone.now()
+                else:
+                    date_jalali = expense_form.cleaned_data['date']
+                    date_gregorian = datetime.date(*map(int, date_jalali.split('-'))).togregorian()
+                    expense.date = timezone.make_aware(datetime.combine(date_gregorian, datetime.min.time()))
+                expense.save()
+                messages.success(request, 'هزینه با موفقیت ثبت شد.')
 
-    # دریافت درآمدها و هزینه‌ها  
-    incomes = Income.objects.filter(user=request.user).order_by('-date')  
-    expenses = Expense.objects.filter(user=request.user).order_by('-date')  
+    incomes = Income.objects.filter(user=request.user).order_by('-date')
+    expenses = Expense.objects.filter(user=request.user).order_by('-date')
 
-    # محاسبه مجموع درآمد و هزینه  
-    total_income = sum(income.amount for income in incomes)  
-    total_expense = sum(expense.amount for expense in expenses)  
+    total_income = sum(income.amount for income in incomes)
+    total_expense = sum(expense.amount for expense in expenses)
 
-    # تبدیل تاریخ و زمان به فرمت دلخواه  
-    formatted_incomes = [  
-        {  
-            'amount': income.amount,  
-            'text': income.text,  
-            'date': income.date.strftime('%Y-%m-%d'),  # فرمت تاریخ  
-            'time': income.date.strftime('%H:%M:%S'),  # فرمت زمان  
-        }  
-        for income in incomes  
-    ]  
+    formatted_incomes = [
+        {
+            'amount': income.amount,
+            'text': income.text,
+            'date': income.date.strftime('%Y-%m-%d'),
+            'time': income.date.strftime('%H:%M:%S'),
+        }
+        for income in incomes
+    ]
 
-    formatted_expenses = [  
-        {  
-            'amount': expense.amount,  
-            'text': expense.text,  
-            'date': expense.date.strftime('%Y-%m-%d'),  # فرمت تاریخ  
-            'time': expense.date.strftime('%H:%M:%S'),  # فرمت زمان  
-        }  
-        for expense in expenses  
-    ]  
+    formatted_expenses = [
+        {
+            'amount': expense.amount,
+            'text': expense.text,
+            'date': expense.date.strftime('%Y-%m-%d'),
+            'time': expense.date.strftime('%H:%M:%S'),
+        }
+        for expense in expenses
+    ]
 
-    # ایجاد context برای ارسال به قالب  
-    context = {  
-        'income_form': income_form,  
-        'expense_form': expense_form,  
-        'incomes': formatted_incomes,  
-        'expenses': formatted_expenses,  
-        'total_income': total_income,  
-        'total_expense': total_expense,  
-    }  
-    return render(request, 'dashboard.html', context)  
+    context = {
+        'income_form': income_form,
+        'expense_form': expense_form,
+        'incomes': formatted_incomes,
+        'expenses': formatted_expenses,
+        'total_income': total_income,
+        'total_expense': total_expense,
+    }
+    return render(request, 'dashboard.html', context)
 
 def logout_view(request):  
     logout(request)  
-    return render(request, 'login.html')  
+    return redirect('activate')
 
 @login_required  
 def dashboard_expense(request):  

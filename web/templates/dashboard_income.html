@@ -47,23 +47,19 @@
     <h3>Total incomes: {{ total_incomes }}</h3>  
 </div>
 <script>  
-    // Add AJAX submission for the income form  
     $('#income-form').on('submit', function(event) {  
-        event.preventDefault();  
-        $.ajax({  
-            type: 'POST',  
-            url: $(this).attr('action'),  
-            data: $(this).serialize(),  
-            success: function(response) {  
-                if (response.status === 'ok') {  
-                    $('#content').load("{% url 'dashboard_income' %} > *"); // Reload the income dashboard content  
-                } else {  
-                    alert(response.message);  
-                }  
-            },  
-            error: function(xhr) {  
-                alert('An error occurred: ' + xhr.responseText);  
-            }  
-        });  
-    });  
+        event.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                $('#message').html('<div class="alert alert-success">هزینه با موفقیت ثبت شد.</div>');
+                $('#content').load("{% url 'dashboard' %} #content > *"); // Load dashboard content without full refresh
+            },
+            error: function(xhr) {
+                $('#message').html('<div class="alert alert-danger">An error occurred: ' + xhr.responseText + '</div>');
+            }
+        });
+    });    
 </script>

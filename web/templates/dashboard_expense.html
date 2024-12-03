@@ -19,6 +19,9 @@
         </div>  
         <button type="submit" name="expense_submit" class="btn btn-primary">Submit Expense</button>  
     </form>
+
+    <div id="message" style="margin-top: 20px;"></div>
+
     <h2>Expenses</h2>  
     <table class="table">  
         <thead>  
@@ -46,24 +49,21 @@
     <h3>Total Expense: {{ total_expense }}</h3>  
 </div>  
 
-<script>  
-    // Add AJAX submission for the expense form  
-    $('#expense-form').on('submit', function(event) {  
-        event.preventDefault();  
-        $.ajax({  
-            type: 'POST',  
-            url: $(this).attr('action'),  
-            data: $(this).serialize(),  
-            success: function(response) {  
-                if (response.status === 'ok') {  
-                    $('#content').load("{% url 'dashboard_expense' %} > *"); // Reload the expense dashboard content  
-                } else {  
-                    alert(response.message);  
-                }  
-            },  
-            error: function(xhr) {  
-                alert('An error occurred: ' + xhr.responseText);  
-            }  
-        });  
-    });  
+<script>
+    $('#expense-form').on('submit', function(event) {
+        event.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                $('#message').html('<div class="alert alert-success">هزینه با موفقیت ثبت شد.</div>');
+                $('#content').load("{% url 'dashboard' %} #content > *"); // Load dashboard content without full refresh
+            },
+            error: function(xhr) {
+                $('#message').html('<div class="alert alert-danger">An error occurred: ' + xhr.responseText + '</div>');
+            }
+        });
+    });
 </script>
+
