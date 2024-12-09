@@ -1,4 +1,4 @@
-{% load static %}  <!-- بارگذاری فایل‌های استاتیک در Django -->  
+{% load static %}  
 <!DOCTYPE html>  
 <html lang="en">  
 <head>  
@@ -7,14 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />  
     <meta name="description" content="" />  
     <meta name="author" content="" />  
-    <title>Arman Group</title>
+    <title>Accounting</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">    
     <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet" crossorigin="anonymous" />  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>  
 </head>  
 <body class="sb-nav-fixed">  
-    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">  
-        <a class="navbar-brand" href="/">Arman Group</a>  
+    <nav class="navbar navbar-expand navbar-dark bg-dark">  
+        <a class="navbar-brand" href="/">Accounting</a>  
         <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>  
         <!-- Navbar-->  
         <ul class="navbar-nav ml-auto ml-md-0">  
@@ -60,7 +60,7 @@
             </nav>  
         </div>  
         <div id="layoutSidenav_content">  
-            <main>  
+            <main style="pading-bottom:108">  
                 <div id="message" style="margin-top: 20px;"></div>
                 <div class="container-fluid" id="content">  
                     <div class="">  
@@ -70,7 +70,6 @@
                     </div>  
                 </div>  
             </main>  
-        
             <footer class="py-4 bg-light text-center" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 2;">  
                 <div class="container-fluid">  
                     <div class="small">  
@@ -86,21 +85,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>  
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" crossorigin="anonymous"></script>  
     <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js" crossorigin="anonymous"></script>  
-    <script>  
-        $('#inputGroupFile01').on('change', function() {  
-            var fileName = $(this).val().split('\\').pop();  
-            $(this).next('.custom-file-label').html(fileName);  
-        });  
-
-        $(document).ready(function() {  
-            $('.ajax-link').on('click', function(event) {  
-                event.preventDefault(); 
-                var url = $(this).attr('href');  
-
-                $('#content').load(url + ' > *', function() {  
-                });  
-            });  
-        });  
-    </script>  
 </body>  
 </html>

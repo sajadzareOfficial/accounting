@@ -1,69 +1,152 @@
-<div class="container-fluid">  
-    <h1 class="mt-4">Expense Dashboard</h1>  
-    {% include 'alert.html' %}  
-    
-    <h2>New Expense Entry</h2>  
-    <form method="post" id="expense-form" action="{% url 'submit_expense' %}">  
-        {% csrf_token %}  
-        <div class="form-group">  
-            <label for="amount">Amount:</label>  
-            <input type="number" class="form-control" id="amount" name="amount" required>  
+{% load static %}  
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="utf-8" />  
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />  
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />  
+    <meta name="description" content="" />  
+    <meta name="author" content="" />  
+    <title>Accounting</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">    
+    <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet" crossorigin="anonymous" />  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>  
+</head>  
+<body class="sb-nav-fixed" style="overflow: scroll;">  
+    <nav class="navbar navbar-expand navbar-dark bg-dark">  
+        <a class="navbar-brand" href="/">Accounting</a>  
+        <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>  
+        <!-- Navbar-->  
+        <ul class="navbar-nav ml-auto ml-md-0">  
+            <li class="nav-item dropdown">  
+                <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">  
+                    <i class="fas fa-user fa-fw"></i>  
+                </a>  
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">  
+                    <a class="dropdown-item" href="{% url 'logout' %}">logout</a>  
+                </div>  
+            </li>  
+        </ul>  
+    </nav>  
+    <div id="layoutSidenav">  
+        <div id="layoutSidenav_nav">  
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">  
+                <div class="sb-sidenav-menu">  
+                    <div class="nav">  
+                        <div class="nav-link h4 mt-4 text-secondary">odriew(MSV)</div>  
+                        <div class="sb-sidenav-menu-heading">Core</div>  
+                        <a class="nav-link ajax-link" href="{% url 'dashboard' %}">  
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>  
+                            Home  
+                        </a>  
+                        <a class="nav-link ajax-link" href="{% url 'dashboard_income' %}">  
+                            <div class="sb-nav-link-icon"><i class="fa fa-snowplow"></i></div>  
+                            Income  
+                        </a>  
+                        <a class="nav-link ajax-link" href="{% url 'dashboard_expense' %}">  
+                            <div class="sb-nav-link-icon"><i class="fa fa-snowplow"></i></div>  
+                            Expense  
+                        </a>  
+                        <a class="nav-link" href="{% url 'logout' %}">  
+                            <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>  
+                            logout  
+                        </a>  
+                    </div>  
+                </div>  
+                <div class="sb-sidenav-footer">  
+                    <div class="small">Logged in as:</div>  
+                    {{ user.username }}  
+                </div>  
+            </nav>  
         </div>  
-        <div class="form-group">  
-            <label for="text">Description:</label>  <!-- تغییر نام از description به text -->  
-            <input type="text" class="form-control" id="text" name="text" required>  
+        <div id="layoutSidenav_content">  
+            <main style="pading-bottom:108">  
+                <div id="message" style="margin-top: 20px;"></div>
+                    <div class="container-fluid">  
+                        <h1 class="mt-4">Expense Dashboard</h1>  
+                        {% include 'alert.html' %}  
+                        <h2>New Expense Entry</h2>  
+                        <form method="post" id="expense-form" action="{% url 'submit_expense' %}">  
+                            {% csrf_token %}  
+                            <div class="form-group">  
+                                <label for="amount">Amount:</label>  
+                                <input type="number" class="form-control" id="amount" name="amount" required>  
+                            </div>  
+                            <div class="form-group">  
+                                <label for="text">Description:</label>  <!-- تغییر نام از description به text -->  
+                                <input type="text" class="form-control" id="text" name="text" required>  
+                            </div>  
+                            <div class="form-group">  
+                                <label for="date">Date:</label>  
+                                <input type="date" class="form-control" id="date" name="date"> <!-- اینجا <-required-> به دلخواه است -->  
+                            </div>  
+                            <button type="submit" name="expense_submit" class="btn btn-primary">Submit Expense</button>  
+                        </form>
+
+                        <div id="message" style="margin-top: 20px;"></div>
+
+                        <h2>Expenses</h2>  
+                        <table class="table">  
+                            <thead>  
+                                <tr>  
+                                    <th>Date</th>  
+                                    <th>Amount</th>  
+                                    <th>Description</th>  
+                                </tr>  
+                            </thead>  
+                            <tbody>  
+                                {% for expense in expenses %}  
+                                <tr>  
+                                    <td>{{ expense.date }}</td>  
+                                    <td>{{ expense.amount }}</td>  
+                                    <td>{{ expense.text }}</td>  
+                                </tr>  
+                                {% empty %}  
+                                <tr>  
+                                    <td colspan="3">No expense records found.</td>  
+                                </tr>  
+                                {% endfor %}  
+                            </tbody>  
+                        </table>  
+                        <h3>Total Expense: {{ total_expense }}</h3>  
+                    </div>  
+                    <div class="sb-sidenav-footer">  
+                        <div class="small">Logged in as:</div>  
+                        {{ user.username }}  
+                    </div>  
+                </div>  
+            </main>  
+            
+                <footer class="py-4 bg-light text-center" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 2;">  
+                    <div class="container-fluid">  
+                        <div class="small">  
+                            {% include 'copyright.html' %}  
+                        </div>  
+                    </div>  
+                </footer>  
+            </div>
         </div>  
-        <div class="form-group">  
-            <label for="date">Date:</label>  
-            <input type="date" class="form-control" id="date" name="date"> <!-- اینجا <-required-> به دلخواه است -->  
-        </div>  
-        <button type="submit" name="expense_submit" class="btn btn-primary">Submit Expense</button>  
-    </form>
-
-    <div id="message" style="margin-top: 20px;"></div>
-
-    <h2>Expenses</h2>  
-    <table class="table">  
-        <thead>  
-            <tr>  
-                <th>Date</th>  
-                <th>Amount</th>  
-                <th>Description</th>  
-            </tr>  
-        </thead>  
-        <tbody>  
-            {% for expense in expenses %}  
-            <tr>  
-                <td>{{ expense.date }}</td>  
-                <td>{{ expense.amount }}</td>  
-                <td>{{ expense.text }}</td>  
-            </tr>  
-            {% empty %}  
-            <tr>  
-                <td colspan="3">No expense records found.</td>  
-            </tr>  
-            {% endfor %}  
-        </tbody>  
-    </table>  
-
-    <h3>Total Expense: {{ total_expense }}</h3>  
-</div>  
-
-<script>
-    $('#expense-form').on('submit', function(event) {
-        event.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            success: function(response) {
-                $('#message').html('<div class="alert alert-success">هزینه با موفقیت ثبت شد.</div>');
-                $('#content').load("{% url 'dashboard' %} #content > *"); // Load dashboard content without full refresh
-            },
-            error: function(xhr) {
-                $('#message').html('<div class="alert alert-danger">An error occurred: ' + xhr.responseText + '</div>');
-            }
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>  
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>  
+    <script src="{% static 'js/scripts.js' %}"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>  
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" crossorigin="anonymous"></script>  
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js" crossorigin="anonymous"></script>  
+    <script>
+        $('#expense-form').on('submit', function(event) {
+            event.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    $('#message').html('<div class="alert alert-success">هزینه با موفقیت ثبت شد.</div>');
+                },
+                error: function(xhr) {
+                    $('#message').html('<div class="alert alert-danger">An error occurred: ' + xhr.responseText + '</div>');
+                }
+            });
         });
-    });
-</script>
-
+    </script>
+</body>  
+</html>
