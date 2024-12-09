@@ -27,8 +27,8 @@ This project is a web application built with Django that allows users to track t
 ### Steps to Install  
 1. **Clone the repository:**  
    ```bash  
-   git clone https://github.com/yourusername/income-expense-tracker.git  
-   cd income-expense-tracker
+   git clone https://github.com/odriew3j/accounting.git  
+   cd accounting
 2. Create a virtual environment:
    ```bash  
     python -m venv venv  
