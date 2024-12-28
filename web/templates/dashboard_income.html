@@ -9,6 +9,7 @@
     <meta name="author" content="" />  
     <title>Accounting</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">    
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custome.css' %}">    
     <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet" crossorigin="anonymous" />  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>  
 </head>  
@@ -84,28 +85,30 @@
                             <button type="submit" name="income_submit" class="btn btn-primary">Submit income</button>  
                         </form>  
                         <h2>incomes</h2>  
-                        <table class="table">  
-                            <thead>  
-                                <tr>  
-                                    <th>Date</th>  
-                                    <th>Amount</th>  
-                                    <th>Description</th>  
-                                </tr>  
-                            </thead>  
-                            <tbody>  
-                                {% for income in incomes %}  
-                                <tr>  
-                                    <td>{{ income.date }}</td>  
-                                    <td>{{ income.amount }}</td>  
-                                    <td>{{ income.text }}</td>  
-                                </tr>  
-                                {% empty %}  
-                                <tr>  
-                                    <td colspan="3">No income records found.</td>  
-                                </tr>  
-                                {% endfor %}  
-                            </tbody>  
-                        </table>  
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for incomes in incomes %}
+                                    <tr>
+                                        <td>{{ incomes.date }}</td>
+                                        <td>{{ incomes.amount }}</td>
+                                        <td>{{ incomes.text }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3">No expense records found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         <h3>Total incomes: {{ total_incomes }}</h3>  
                     </div>
                 </div>  
