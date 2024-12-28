@@ -283,6 +283,7 @@ def handle_expense_submission(request):
     return redirect('dashboard')
 
 '''
+
 # Dashboard View
 @login_required(login_url='/login/')
 def dashboard_view(request):

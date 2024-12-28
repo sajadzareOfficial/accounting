@@ -36,7 +36,10 @@ This project is a web application built with Django that allows users to track t
 3. Install the required packages:
    ```bash
    pip install -r requirements.txt
-4. Set up the database:
+4. Set up the setting:
+   ```bash
+   mv settings.py.sample settings.py  # On Windows use `ren settings.py.sample settings.py`
+5. Set up the database:
    ```bash
    python manage.py migrate
 6. Run the development server:

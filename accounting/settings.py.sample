@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import logging
+import sys
+import io
+
+# Set default encoding to UTF-8
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2otv1&__6$j*zsd#1b0&nxo)e3-5@g&hr*b&c@)fco@z0rm1w5'
+SECRET_KEY = 'SECRET_KEY'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -68,6 +76,14 @@ TEMPLATES = [
     },
 ]
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+
+
+
 WSGI_APPLICATION = 'accounting.wsgi.application'
 
 
@@ -76,7 +92,7 @@ WSGI_APPLICATION = 'accounting.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', 
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
@@ -118,15 +134,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-AUTHENTICATION_BACKENDS = [  
-    'django.contrib.auth.backends.ModelBackend',  
-]
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'EMAIL_HOST'  # SMTP server for Gmail
+MAIL_PORT = MAIL_PORT  # SMTP port for Gmail
+EMAIL_USE_TLS = True  # Use True if your SMTP server requires TLS
+EMAIL_USE_SSL = False  # Use True if your SMTP server requires SSL
+EMAIL_HOST_USER = 'EMAIL_HOST_USER'  # Your email address
+EMAIL_HOST_PASSWORD = 'EMAIL_HOST_PASSWORD'  # Your email password (should be set in environment variables)
 
-EMAIL_HOST = 'smtp.gmail.com'  
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
