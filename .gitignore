@@ -16,3 +16,5 @@ build/
 tests/report/
 tests/screenshots/
 *.log
+presentation
+debug.log

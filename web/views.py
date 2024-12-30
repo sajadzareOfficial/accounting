@@ -126,7 +126,6 @@ def submit_expense(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
         
 # Registration View
-# Registration View
 def register(request):  
     if request.method == 'POST':  
         form = RegistrationForm(request.POST)  
@@ -153,7 +152,7 @@ def register(request):
             now = timezone.now()
 
             # Store activation data temporarily
-            Passwordresetcodes.objects.create(email=email, time=now, code=code, username=username, password=password)
+            PasswordResetCode.objects.create(email=email, created_at=now, code=code, username=username, password=password)
 
             activation_link = f"http://localhost:8009/activate/?email={email}&code={code}"
 
@@ -177,7 +176,7 @@ def activate(request):
     code = request.GET.get('code')  
 
     try:  
-        reset_code = Passwordresetcodes.objects.get(email=email, code=code)
+        reset_code = PasswordResetCode.objects.get(email=email, code=code)
 
         # Create user and delete reset code
         user = User.objects.create_user(username=reset_code.username, email=email, password=reset_code.password)  
@@ -188,7 +187,7 @@ def activate(request):
 
         messages.success(request, 'Account activated successfully! Please log in.')
         return redirect('login')
-    except Passwordresetcodes.DoesNotExist:  
+    except PasswordResetCode.DoesNotExist:  
         messages.error(request, 'Invalid activation code.')
         return redirect('register')
 
@@ -211,9 +210,6 @@ def logout_view(request):
     logout(request)  
     messages.success(request, 'You have been logged out.')
     return redirect('login')
-
-
-from django.db import models  # Ensure this is added at the top of the file
 
 @login_required(login_url='/login/')
 def dashboard_view(request):
